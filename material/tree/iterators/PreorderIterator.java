@@ -3,8 +3,7 @@ package material.tree.iterators;
 import material.Position;
 import material.tree.Tree;
 
-import java.util.ArrayDeque;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -14,30 +13,55 @@ import java.util.function.Predicate;
  * @author A. Duarte, J. Vélez, J. Sánchez-Oro, JD. Quintana
  */
 public class PreorderIterator<E> implements Iterator<Position<E>> {
+    //raiz, izq y der
 
-    //TODO: Implementar (alumnos)
+    private ArrayDeque<Position<E>> nodeQueue;
+    private Tree<E> tree;
+    private Predicate<Position<E>> predicate;
+
 
     public PreorderIterator(Tree<E> tree) {
-        throw new RuntimeException("Not yet implemented");
+        nodeQueue = new ArrayDeque<>();
+        this.tree = tree;
+        this.predicate = null;
+        if (tree.root() != null) {
+            nodeQueue.add(tree.root());
+        }
     }
 
+
     public PreorderIterator(Tree<E> tree, Position<E> start) {
-        throw new RuntimeException("Not yet implemented");
+        nodeQueue = new ArrayDeque<>();
+        this.tree = tree;
+        nodeQueue.add(start);
+        this.predicate = null;
     }
 
     public PreorderIterator(Tree<E> tree, Position<E> start, Predicate<Position<E>> predicate) {
-        throw new RuntimeException("Not yet implemented");
+        nodeQueue = new ArrayDeque<>();
+        this.tree = tree;
+        this.predicate = predicate;
+        nodeQueue.add(start);
     }
 
 
     @Override
     public boolean hasNext() {
-        throw new RuntimeException("Not yet implemented");
+        return nodeQueue.size() != 0;
     }
 
     @Override
     public Position<E> next() {
-        throw new RuntimeException("Not yet implemented");
+        Position<E> node = nodeQueue.poll();
+        Stack<Position<E>> stack = new Stack<>();
+        for (Position<E> n : tree.children(node)) {
+            if (this.predicate == null || this.predicate.test(n))
+                stack.push(n);
+        }
+        while (!stack.isEmpty()) {
+            nodeQueue.addFirst(stack.pop());
+        }
+        return node;
     }
 
     private void lookForward() {

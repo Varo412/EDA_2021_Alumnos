@@ -1,7 +1,12 @@
 package material.test.practica2;
 
 import material.Position;
+import material.tree.iterators.FrontIterator;
+import material.tree.iterators.PostorderIterator;
+import material.tree.iterators.PreorderIterator;
 import material.tree.narytree.LinkedTree;
+
+import java.util.Iterator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -238,6 +243,36 @@ class LinkedTreeTest {
         RuntimeException thrown = assertThrows(RuntimeException.class,
                 () -> tree.moveSubtree(pos[4], pos[4]));
         assertEquals("Both positions are the same", thrown.getMessage());
+    }
+
+    @org.junit.jupiter.api.Test
+    void preorderIterator() {
+        Iterator<Position<Integer>> ite = new PreorderIterator<>(this.tree);
+        String result = "";
+        while (ite.hasNext()) {
+            result += ite.next().getElement();
+        }
+        assertEquals(result, "01526791011384");
+    }
+
+    @org.junit.jupiter.api.Test
+    void postOrderIterator() {
+        Iterator<Position<Integer>> ite = new PostorderIterator<>(this.tree);
+        String result = "";
+        while (ite.hasNext()) {
+            result += ite.next().getElement();
+        }
+        assertEquals(result, "51691011728340");
+    }
+
+    @org.junit.jupiter.api.Test
+    void frontIterator() {
+        Iterator<Position<Integer>> ite = new FrontIterator<>(this.tree);
+        String result = "";
+        while (ite.hasNext()) {
+            result += ite.next().getElement();
+        }
+        assertEquals(result, "456891011");
     }
 
 }

@@ -3,7 +3,10 @@ package material.tree.iterators;
 import material.Position;
 import material.tree.Tree;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Queue;
 
 /**
  * Front iteartor for trees.
@@ -13,19 +16,31 @@ import java.util.Iterator;
  */
 public class FrontIterator<T> implements Iterator<Position<T>> {
 
+    private Queue<Position<T>> nodeQueue;
+    private Tree<T> tree;
+    private HashSet<Position<T>> set;
+
 
     public FrontIterator(Tree<T> tree) {
-        throw new RuntimeException("Not yet implemented");
+        this.nodeQueue = new ArrayDeque();
+        this.tree = tree;
+        this.set = new HashSet<>(tree.size());
+        if (!tree.isEmpty()) {
+            this.nodeQueue.add(tree.root());
+        }
     }
 
 
     public FrontIterator(Tree<T> tree, Position<T> node) {
-        throw new RuntimeException("Not yet implemented");
+        this.nodeQueue = new ArrayDeque();
+        this.tree = tree;
+        this.set = new HashSet<>(tree.size());
+        nodeQueue.add(node);
     }
 
     @Override
     public boolean hasNext() {
-        throw new RuntimeException("Not yet implemented");
+        return !this.nodeQueue.isEmpty();
     }
 
     /**
@@ -33,11 +48,18 @@ public class FrontIterator<T> implements Iterator<Position<T>> {
      */
     @Override
     public Position<T> next() {
-        throw new RuntimeException("Not yet implemented");
+        Position<T> p = nodeQueue.poll();
+        if (tree.isLeaf(p)) {
+            return p;
+        }
+        for (Position<T> c : tree.children(p)) {
+            nodeQueue.add(c);
+        }
+        return next();
     }
 
     @Override
-    public void remove() {
-        throw new RuntimeException("Not yet implemented");
+    public void remove() throws RuntimeException {
+        throw new RuntimeException("You should not call this method.");
     }
 }

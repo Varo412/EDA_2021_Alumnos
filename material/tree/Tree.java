@@ -82,4 +82,9 @@ public interface Tree<E> extends Iterable<Position<E>> {
      * @throws RuntimeException if the tree already has a root
      */
     Position<E> addRoot(E e) throws RuntimeException;
+
+    /**
+     * Moves a node and its corresponding subtree (rooted at pOrig) to make it as a new children of pDest
+     */
+    public void moveSubtree(Position<E> pOrig, Position<E> pDest) throws RuntimeException;
 }

@@ -265,6 +265,11 @@ public class LinkedBinaryTree<E> implements BinaryTree<E> {
     }
 
     @Override
+    public void moveSubtree(Position<E> pOrig, Position<E> pDest) throws RuntimeException {
+        //DO NOT IMPLEMENT, I GUESS
+    }
+
+    @Override
     public Position<E> insertLeft(Position<E> p, E e) throws RuntimeException {
         BTNode<E> node = checkPosition(p);
         Position<E> leftPos = node.getLeft();
@@ -440,7 +445,7 @@ public class LinkedBinaryTree<E> implements BinaryTree<E> {
     }
 
     @Override
-    public boolean isComplete() 
+    public boolean isComplete() {
         for (Position<E> next : this) {
             if (this.isInternal(next) && (!this.hasLeft(next) || !this.hasRight(next)))
                 return false;
