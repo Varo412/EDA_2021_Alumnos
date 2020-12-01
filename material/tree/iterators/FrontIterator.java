@@ -18,13 +18,13 @@ public class FrontIterator<T> implements Iterator<Position<T>> {
 
     private Queue<Position<T>> nodeQueue;
     private Tree<T> tree;
-    private HashSet<Position<T>> set;
+//    private HashSet<Position<T>> set;
 
 
     public FrontIterator(Tree<T> tree) {
         this.nodeQueue = new ArrayDeque();
         this.tree = tree;
-        this.set = new HashSet<>(tree.size());
+//        this.set = new HashSet<>(tree.size());
         if (!tree.isEmpty()) {
             this.nodeQueue.add(tree.root());
         }
@@ -34,7 +34,7 @@ public class FrontIterator<T> implements Iterator<Position<T>> {
     public FrontIterator(Tree<T> tree, Position<T> node) {
         this.nodeQueue = new ArrayDeque();
         this.tree = tree;
-        this.set = new HashSet<>(tree.size());
+//        this.set = new HashSet<>(tree.size());
         nodeQueue.add(node);
     }
 

@@ -13,7 +13,6 @@ public class ArrayQueue<E> implements Queue<E> {
         this.lastPosition = -1;
         this.queue = new Object[16];
         this.size = 0;
-
     }
 
     @Override

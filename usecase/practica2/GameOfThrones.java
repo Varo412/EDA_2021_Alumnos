@@ -89,8 +89,6 @@ public class GameOfThrones {
         }
     }
 
-
-    //    private HashSet<FamilyMember> members;
     private HashMap<String, FamilyMember> members;
     private HashMap<String, LinkedTree<FamilyMember>> heads;
     private HashMap<String, String> names;
