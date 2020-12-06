@@ -1,9 +1,7 @@
 package material.maps;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Separate chaining table implementation of hash tables. Note that all
@@ -12,7 +10,6 @@ import java.util.Random;
  * @author A. Duarte, J. Vélez, J. Sánchez-Oro, Sergio Pérez
  */
 public class HashTableMapSC<K, V> implements Map<K, V> {
-    //TODO: Ejercicio para los alumnos, implementar todo
 
     private class HashEntry<T, U> implements Entry<T, U> {
 
@@ -20,26 +17,28 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
         protected U value;
 
         public HashEntry(T k, U v) {
-            throw new RuntimeException("Not yet implemented");
+            this.key = k;
+            this.value = v;
         }
 
         @Override
         public U getValue() {
-            throw new RuntimeException("Not yet implemented");
+            return this.value;
         }
 
         @Override
         public T getKey() {
-            throw new RuntimeException("Not yet implemented");
+            return this.key;
         }
 
         public U setValue(U val) {
-            throw new RuntimeException("Not yet implemented");
+            U old = this.value;
+            this.value = val;
+            return old;
         }
 
         @Override
         public boolean equals(Object o) {
-
             throw new RuntimeException("Not yet implemented");
         }
 
@@ -54,19 +53,25 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
 
     private class HashTableMapIterator<T, U> implements Iterator<Entry<T, U>> {
 
-        public HashTableMapIterator(List<HashEntry<T, U>>[] map, int numElems) {
-            throw new RuntimeException("Not yet implemented");
-        }
+        private Queue<HashEntry<T, U>> queue;
+//        private final int n;
 
+        public HashTableMapIterator(List<HashEntry<T, U>>[] map, int numElems) {
+//            n = numElems;
+            this.queue = new LinkedList();
+            for (List<HashEntry<T, U>> e : map) {
+                queue.addAll(e);
+            }
+        }
 
         @Override
         public boolean hasNext() {
-            throw new RuntimeException("Not yet implemented");
+            return this.queue.size() > 0;
         }
 
         @Override
         public Entry<T, U> next() {
-            throw new RuntimeException("Not yet implemented");
+            return this.queue.remove();
         }
 
         @Override
@@ -81,6 +86,7 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
          * (if the parameter is already a valid position then does nothing)
          */
         private int goToNextBucket(int i) {
+            //TODO
             throw new RuntimeException("Not yet implemented");
         }
     }
@@ -132,16 +138,47 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
         }
     }
 
-
     /**
-     * The array of Lists.
+     * An element position has two parameters: the first one is the position in the array of the allocated element, and
+     * the second one is the element position in the inner list.
+     *
+     * @author Álvaro Rivas
      */
+    protected class HashEntryIndex {
+        int index[];
+        boolean found;
+
+        public HashEntryIndex(int index[], boolean f) {
+            this.index = index;
+            this.found = f;
+        }
+
+        //Easy visualization
+        @Override
+        public String toString() {
+            return "(" + this.index + ", " + this.found + ")";
+        }
+    }
+
+
+    private ArrayList<HashEntry<K, V>> bucket[];
+    private int prime;
+    private int capacity;
+    private int n;
+    protected long scale, shift; // the shift and scaling factors
+    protected final HashEntry<K, V> AVAILABLE = new HashEntry<>(null, null);
 
     /**
      * Creates a hash table with prime factor 109345121 and capacity 1000.
      */
     public HashTableMapSC() {
-        throw new RuntimeException("Not yet implemented");
+        this.capacity = 100;
+        this.prime = 109345121;
+        this.n = 0;
+        this.bucket = new ArrayList[capacity];
+        Random rand = new Random();
+        this.scale = rand.nextInt(prime - 1) + 1;
+        this.shift = rand.nextInt(prime);
     }
 
     /**
@@ -150,7 +187,13 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
      * @param cap initial capacity
      */
     public HashTableMapSC(int cap) {
-        throw new RuntimeException("Not yet implemented");
+        this.capacity = cap;
+        this.prime = 109345121;
+        this.n = 0;
+        this.bucket = new ArrayList[capacity];
+        Random rand = new Random();
+        this.scale = rand.nextInt(prime - 1) + 1;
+        this.shift = rand.nextInt(prime);
     }
 
     /**
@@ -160,7 +203,13 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
      * @param cap initial capacity
      */
     public HashTableMapSC(int p, int cap) {
-        throw new RuntimeException("Not yet implemented");
+        this.capacity = cap;
+        this.prime = p;
+        this.n = 0;
+        this.bucket = new ArrayList[capacity];
+        Random rand = new Random();
+        this.scale = rand.nextInt(prime - 1) + 1;
+        this.shift = rand.nextInt(prime);
     }
 
     /**
@@ -170,55 +219,86 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
      * @return the hash value
      */
     protected int hashValue(K key) {
-        throw new RuntimeException("Not yet implemented");
+        return (int) (Math.abs(key.hashCode() * this.scale + this.shift) % this.prime) % this.capacity;
     }
 
 
     @Override
     public int size() {
-        throw new RuntimeException("Not yet implemented");
+        return this.n;
     }
 
     @Override
     public boolean isEmpty() {
-        throw new RuntimeException("Not yet implemented");
+        return this.n == 0;
     }
 
     @Override
     public V get(K key) {
-        throw new RuntimeException("Not yet implemented");
+        HashEntryIndex i = findEntry(key); // helper method for finding a key
+        if (!i.found) {
+            return null; // there is no value for this key, so return null
+        }
+        return bucket[i.index[0]].get(i.index[1]).getValue(); // return the found value in this case
     }
 
     @Override
     public V put(K key, V value) {
-        throw new RuntimeException("Not yet implemented");
+        HashEntryIndex i = findEntry(key);
+        V old = null;
+        if (i.found)
+            return bucket[i.index[0]].get(i.index[1]).getValue();
+        if (this.n > this.capacity / 2) {
+            this.rehash(capacity * 2);
+            i = findEntry(key);
+        }
+        bucket[i.index[0]].add(new HashEntry<>(key, value));
+        n++;
+        return null;
     }
 
     @Override
     public V remove(K key) {
-        throw new RuntimeException("Not yet implemented");
+        HashEntryIndex i = this.findEntry(key);
+        if (i.found) {
+            n--;
+            return bucket[i.index[0]].remove(i.index[1]).getValue();
+        }
+        return null;
     }
 
 
     @Override
     public Iterator<Entry<K, V>> iterator() {
-        throw new RuntimeException("Not yet implemented");
+        return new HashTableMapIterator<K, V>(this.bucket, n);
 
     }
 
     @Override
     public Iterable<K> keys() {
-        throw new RuntimeException("Not yet implemented");
+        return Arrays.stream(this.bucket).flatMap(Collection::stream).map(HashEntry::getKey).collect(Collectors.toList());
+
+
+//        LinkedList<K> l = new LinkedList<>();
+//        for (List<HashEntry<K, V>> e : this.bucket)
+//            l.addAll(e.stream().map(HashEntry::getKey).collect(Collectors.toList()));
+//        return l;
     }
 
     @Override
     public Iterable<V> values() {
-        throw new RuntimeException("Not yet implemented");
+        LinkedList<V> l = new LinkedList<>();
+        for (List<HashEntry<K, V>> e : this.bucket)
+            l.addAll(e.stream().map(HashEntry::getValue).collect(Collectors.toList()));
+        return l;
     }
 
     @Override
     public Iterable<Entry<K, V>> entries() {
-        throw new RuntimeException("Not yet implemented");
+        LinkedList<Entry<K, V>> l = new LinkedList<>();
+        for (List<HashEntry<K, V>> e : this.bucket)
+            l.addAll(e);
+        return l;
     }
 
     /**
@@ -227,7 +307,7 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
      * @param k Key
      */
     protected void checkKey(K k) {
-        throw new RuntimeException("Not yet implemented");
+        if (k == null) throw new IllegalStateException("Invalid key: null.");
     }
 
 
@@ -235,6 +315,40 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
      * Increase/reduce the size of the hash table and rehashes all the entries.
      */
     protected void rehash(int newCap) {
-        throw new RuntimeException("Not yet implemented");
+        this.capacity = newCap;
+
+        //TODO: ¿Por qué los cambiamos?
+        Random rand = new Random();
+        scale = rand.nextInt(prime - 1) + 1;
+        shift = rand.nextInt(prime);
+
+        ArrayList<HashEntry<K, V>>[] resized = new ArrayList[newCap];
+        Iterator<Entry<K, V>> it = this.iterator();
+        while (it.hasNext()) {
+            HashEntry<K, V> next = (HashEntry<K, V>) it.next();
+            int index = this.hashValue(next.getKey());
+            resized[index].add(next);
+        }
+        this.bucket = resized;
+    }
+
+
+    /**
+     * Searches for the element's entry by its key
+     *
+     * @param k Key
+     * @return the position required
+     */
+    private HashEntryIndex findEntry(K k) {
+        checkKey(k);
+        int indexBucket = hashValue(k);
+        int indexList = 0;
+
+        while (bucket[indexBucket].get(indexList).getKey() != k && indexList < bucket[indexBucket].size()) {
+            if (bucket[indexBucket].get(indexList).getKey() != k)
+                return new HashEntryIndex(new int[]{indexBucket, indexList}, true);
+            indexList++;
+        }
+        return new HashEntryIndex(new int[]{indexBucket, indexList}, false);
     }
 }

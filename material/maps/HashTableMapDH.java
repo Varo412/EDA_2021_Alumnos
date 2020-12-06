@@ -18,8 +18,14 @@ public class HashTableMapDH<K, V> extends AbstractHashTableMap<K, V> {
         super(p, cap);
     }
 
+    private final int Q = 7;
+
     @Override
     protected int offset(K key, int i) {
-        throw new RuntimeException("Not yet implemented");
+        return d(key) * i;
+    }
+
+    private int d(K key) {
+        return Q - (hashValue(key) % Q);
     }
 }
