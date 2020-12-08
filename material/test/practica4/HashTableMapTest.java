@@ -1,7 +1,7 @@
 package material.test.practica4;
 
 import material.maps.Entry;
-import material.maps.HashTableMapDH;
+//import material.maps.HashTableMapDH;
 import material.maps.HashTableMapSC;
 import material.maps.Map;
 import org.junit.jupiter.api.AfterEach;
@@ -17,12 +17,12 @@ class HashTableMapTest {
     Map<String, Integer> map;
 
 
-    public static <K,V> Map<K, V> newTestMapInstance() {
+    public static <K, V> Map<K, V> newTestMapInstance() {
         return new HashTableMapSC<>();
     }
 
-    public <K,V> Map<K, V> newTestMapInstance(int capacity) {
-        return new HashTableMapDH<>(capacity);
+    public <K, V> Map<K, V> newTestMapInstance(int capacity) {
+        return new HashTableMapSC<>(capacity);
     }
 
     @BeforeEach
@@ -267,7 +267,7 @@ class HashTableMapTest {
 
 
     @Test
-    void forced_collitions(){
+    void forced_collitions() {
         class EvilHashCodeObject {
             //Hashcode and Equals should be coherent:
             // if we use both id and value to compare equality
@@ -283,13 +283,13 @@ class HashTableMapTest {
             private Integer id;
             private Integer value;
 
-            private EvilHashCodeObject(int id, int value){
+            private EvilHashCodeObject(int id, int value) {
                 this.id = id;
                 this.value = value;
             }
 
             @Override
-            public int hashCode(){
+            public int hashCode() {
                 return this.id.hashCode();
             }
 
@@ -303,23 +303,23 @@ class HashTableMapTest {
             }
 
             @Override
-            public String toString(){
-                return "BHO(id="+this.id+", v="+this.value+")";
+            public String toString() {
+                return "BHO(id=" + this.id + ", v=" + this.value + ")";
             }
         }
 
         Map<EvilHashCodeObject, Integer> map1 = newTestMapInstance();
         final int N = 10;
         final int M = 5; //forced collitions per item
-        List<EvilHashCodeObject> allList = new ArrayList<>(N*M);
+        List<EvilHashCodeObject> allList = new ArrayList<>(N * M);
         for (int j = 0; j < M; j++) {
             for (int i = 0; i < N; i++) {
-                EvilHashCodeObject bh = new EvilHashCodeObject(i,i+1000*j);
-                map1.put(bh, i+1000*j);
+                EvilHashCodeObject bh = new EvilHashCodeObject(i, i + 1000 * j);
+                map1.put(bh, i + 1000 * j);
                 allList.add(bh);
             }
         }
-        assertEquals(N*M, map1.size());
+        assertEquals(N * M, map1.size());
         Collections.shuffle(allList);
 
         for (EvilHashCodeObject e : allList) {

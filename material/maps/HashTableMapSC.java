@@ -57,24 +57,28 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
         private int listIndex;
         private final int n;
         private List<HashEntry<T, U>>[] map;
+        private int c;
 
         public HashTableMapIterator(List<HashEntry<T, U>>[] map, int numElems) {
             //TODO: No uso numElems
             n = numElems;
             arrayIndex = 0;
-            listIndex = goToNextBucket(0);
             this.map = map;
+            listIndex = goToNextBucket(listIndex);
+            c = 0;
         }
 
         @Override
         public boolean hasNext() {
-            return this.goToNextBucket(listIndex) != -1;
+            return c < n;
         }
 
         @Override
         public Entry<T, U> next() {
-            listIndex = goToNextBucket(listIndex);
-            return this.map[listIndex].get(listIndex);
+            c++;
+            Entry res = this.map[arrayIndex].get(listIndex);
+            listIndex = goToNextBucket(listIndex + 1);
+            return res;
         }
 
         @Override
@@ -89,12 +93,15 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
          * (if the parameter is already a valid position then does nothing)
          */
         private int goToNextBucket(int i) {
-            if (this.map[arrayIndex].size() < i) return i++;
+            if (this.map[arrayIndex].size() > i) return i;
 
-            while (arrayIndex != map.length && this.map[arrayIndex].size() == 0)
+            do {
                 arrayIndex++;
+            } while (arrayIndex < map.length && (this.map[arrayIndex].size() == 0));
 
-            if (arrayIndex != map.length) return i++;
+            if (arrayIndex < map.length) {
+                return 0;
+            }
             return -1;
         }
     }
@@ -174,22 +181,21 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
     private int capacity;
     private int n;
     protected long scale, shift; // the shift and scaling factors
-    protected final HashEntry<K, V> AVAILABLE = new HashEntry<>(null, null);
 
     /**
      * Creates a hash table with prime factor 109345121 and capacity 1000.
      */
     public HashTableMapSC() {
-        this.capacity = 100;
+        this.capacity = 1000;
         this.prime = 109345121;
         this.n = 0;
+        Random rand = new Random();
+        this.scale = rand.nextInt(prime - 1) + 1;
+        this.shift = rand.nextInt(prime);
         this.bucket = new ArrayList[capacity];
         for (int i = 0; i < capacity; i++) {
             bucket[i] = new ArrayList<>();
         }
-        Random rand = new Random();
-        this.scale = rand.nextInt(prime - 1) + 1;
-        this.shift = rand.nextInt(prime);
     }
 
     /**
@@ -201,10 +207,13 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
         this.capacity = cap;
         this.prime = 109345121;
         this.n = 0;
-        this.bucket = new ArrayList[capacity];
         Random rand = new Random();
         this.scale = rand.nextInt(prime - 1) + 1;
         this.shift = rand.nextInt(prime);
+        this.bucket = new ArrayList[capacity];
+        for (int i = 0; i < capacity; i++) {
+            bucket[i] = new ArrayList<>();
+        }
     }
 
     /**
@@ -217,10 +226,13 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
         this.capacity = cap;
         this.prime = p;
         this.n = 0;
-        this.bucket = new ArrayList[capacity];
         Random rand = new Random();
         this.scale = rand.nextInt(prime - 1) + 1;
         this.shift = rand.nextInt(prime);
+        this.bucket = new ArrayList[capacity];
+        for (int i = 0; i < capacity; i++) {
+            bucket[i] = new ArrayList<>();
+        }
     }
 
     /**
@@ -256,10 +268,9 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
     @Override
     public V put(K key, V value) {
         HashEntryIndex i = findEntry(key);
-        V old = null;
         if (i.found)
             return bucket[i.index[0]].get(i.index[1]).setValue(value);
-        if (this.n > this.capacity / 2) {
+        if (this.n >= this.capacity / 2) {
             this.rehash(capacity * 2);
             i = findEntry(key);
         }
@@ -287,11 +298,6 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
     @Override
     public Iterable<K> keys() {
         return Arrays.stream(this.bucket).flatMap(Collection::stream).map(HashEntry::getKey).collect(Collectors.toList());
-
-//        LinkedList<K> l = new LinkedList<>();
-//        for (List<HashEntry<K, V>> e : this.bucket)
-//            l.addAll(e.stream().map(HashEntry::getKey).collect(Collectors.toList()));
-//        return l;
     }
 
     @Override
@@ -331,14 +337,18 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
         scale = rand.nextInt(prime - 1) + 1;
         shift = rand.nextInt(prime);
 
-        ArrayList<HashEntry<K, V>>[] resized = new ArrayList[newCap];
-        Iterator<Entry<K, V>> it = this.iterator();
-        while (it.hasNext()) {
-            HashEntry<K, V> next = (HashEntry<K, V>) it.next();
-            int index = this.hashValue(next.getKey());
-            resized[index].add(next);
+        ArrayList<HashEntry<K, V>>[] resized = this.bucket;
+        this.bucket = new ArrayList[capacity];
+
+        for (int i = 0; i < capacity; i++) {
+            bucket[i] = new ArrayList<>();
         }
-        this.bucket = resized;
+        for (ArrayList<HashEntry<K, V>> l : resized) {
+            for (HashEntry<K, V> e : l) {
+                int index = hashValue(e.getKey());
+                bucket[index].add(e);
+            }
+        }
     }
 
 
@@ -354,7 +364,7 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
         int indexList = 0;
 
         while (indexList < bucket[indexBucket].size()) {
-            if (bucket[indexBucket].get(indexList).getKey() == k)
+            if (bucket[indexBucket].get(indexList).getKey().equals(k))
                 return new HashEntryIndex(new int[]{indexBucket, indexList}, true);
             indexList++;
         }
