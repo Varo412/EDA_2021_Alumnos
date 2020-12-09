@@ -2,19 +2,23 @@ package material.test.practica4;
 
 
 import usecase.practica4.*;
+import usecase.practica4.PearRegister.PearStore;
+import usecase.practica4.PearRegister.Product;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PearRegisterTest {
     private static PearRegister register;
 
     @org.junit.jupiter.api.BeforeAll
-    static void loadFile() {
+    static void loadFile() throws IOException {
         register = new PearRegister();
-        String path = "src/PearSalesFile.txt";
+        String path = "docs/p4 - PearSalesFile.txt";
         register.loadFile(path);
     }
 

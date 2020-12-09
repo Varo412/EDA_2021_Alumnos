@@ -331,8 +331,6 @@ public class HashTableMapSC<K, V> implements Map<K, V> {
      */
     protected void rehash(int newCap) {
         this.capacity = newCap;
-
-        //TODO: ¿Por qué los cambiamos?
         Random rand = new Random();
         scale = rand.nextInt(prime - 1) + 1;
         shift = rand.nextInt(prime);
