@@ -1,11 +1,12 @@
 package usecase.practica4;
 
 import material.maps.HashTableMapDH;
+import material.maps.HashTableMapSC;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class PearRegister {
 
@@ -89,14 +90,14 @@ public class PearRegister {
     }
 
 
-    HashTableMapDH<Product, List<PearStore>> register;
+    HashTableMapSC<Product, ArrayList<PearStore>> register;
 
     public void loadFile(String pathToFile) throws IOException {
         File file = new File(pathToFile);
         Scanner scan = new Scanner(file);
         int n = scan.nextInt();
 
-        this.register = new HashTableMapDH<>(n);
+        this.register = new HashTableMapSC<>(n);
 
         for (int i = 0; i < n; i++) {
             String name = scan.next();
@@ -106,43 +107,45 @@ public class PearRegister {
 
             int t = scan.nextInt();
             ArrayList<PearStore> stores = new ArrayList<>(t);
-            for (int j = 0; j < t; i++) {
+            for (int j = 0; j < t; j++) {
                 String storeName = scan.next();
                 int id = scan.nextInt();
                 int stock = scan.nextInt();
-                long score = scan.nextLong();
+                float score = scan.nextFloat();
                 PearStore store = new PearStore(storeName, id, stock, score);
                 stores.add(store);
             }
 
             register.put(product, stores);
-
         }
 
     }
 
     public void addProduct(Product producto, Iterable<PearStore> stores) {
-        throw new RuntimeException("Not yet implemented");
+        register.put(producto, (ArrayList<PearStore>) stores);
     }
 
     public void addSalesInPearStore(Product producto, PearStore store, int units, double score) {
-        throw new RuntimeException("Not yet implemented");
+        register.get(producto).stream().filter(sto -> sto.equals(store)).findFirst().ifPresent(pearStore -> {
+            pearStore.setStock(units);
+            pearStore.setScore(score);
+        });
     }
 
     public double getScoreOfProduct(Product producto) {
-        throw new RuntimeException("Not yet implemented");
+        return register.get(producto).stream().mapToDouble(PearStore::getScore).average().orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     public PearStore getGreatestSeller(Product producto) {
-        throw new RuntimeException("Not yet implemented");
+        return register.get(producto).stream().max(Comparator.comparing(PearStore::getStock)).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     public int getUnits(Product producto) {
-        throw new RuntimeException("Not yet implemented");
+        return register.get(producto).stream().mapToInt(s -> s.getStock()).reduce(Integer::sum).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     public boolean productExists(Product product) {
-        throw new RuntimeException("Not yet implemented");
+        return Objects.nonNull(register.get(product));
     }
 }
 
