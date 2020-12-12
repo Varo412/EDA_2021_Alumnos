@@ -7,6 +7,7 @@ import usecase.practica4.PearRegister.Product;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -52,5 +53,9 @@ class PearRegisterTest {
         Product producto = new Product("MakBukPro", 2019);
         int units = register.getUnits(producto);
         assertEquals(2837, units);
+
+        register.addProduct(new Product("MakBukPro", 2020), new ArrayList<>());
+        int units2 = register.getUnits(new Product("MakBukPro", 2020));
+        assertEquals(0, units2);
     }
 }

@@ -1,10 +1,12 @@
 package usecase.practica4;
 
 import material.maps.HashTableMapDH;
+import material.maps.HashTableMapLP;
 import material.maps.HashTableMapSC;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -90,14 +92,14 @@ public class PearRegister {
     }
 
 
-    HashTableMapSC<Product, ArrayList<PearStore>> register;
+    HashTableMapLP<Product, ArrayList<PearStore>> register;
 
     public void loadFile(String pathToFile) throws IOException {
         File file = new File(pathToFile);
         Scanner scan = new Scanner(file);
         int n = scan.nextInt();
 
-        this.register = new HashTableMapSC<>(n);
+        this.register = new HashTableMapLP<>(n);
 
         for (int i = 0; i < n; i++) {
             String name = scan.next();
@@ -141,11 +143,18 @@ public class PearRegister {
     }
 
     public int getUnits(Product producto) {
-        return register.get(producto).stream().mapToInt(s -> s.getStock()).reduce(Integer::sum).orElseThrow(() -> new RuntimeException("Product not found"));
+        Product p = findProduct(producto);
+        ArrayList<PearStore> l = register.get(p);
+        List<Integer> l2 = register.get(p).stream().map(s -> s.getStock()).collect(Collectors.toList());
+        return register.get(p).stream().map(s -> s.getStock()).reduce(Integer::sum).orElse(0);
     }
 
     public boolean productExists(Product product) {
         return Objects.nonNull(register.get(product));
+    }
+
+    private Product findProduct(Product ref) {
+        return ((ArrayList<Product>) register.keys()).stream().filter(e -> (e.getName().equals(ref.getName()) && e.getYear() == ref.getYear())).findFirst().orElse(null);
     }
 }
 
