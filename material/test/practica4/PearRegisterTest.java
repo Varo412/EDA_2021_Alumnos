@@ -38,6 +38,10 @@ class PearRegisterTest {
     void getScoreOfProduct() {
         Product producto = new Product("MakBukPro", 2019);
         assertEquals(4.1, Math.round(register.getScoreOfProduct(producto) * 10) / 10.0);
+
+        Product producto2 = new Product("MakBukPro", 2034);
+        register.addProduct(producto2, new ArrayList<>());
+        assertEquals(0, Math.round(register.getScoreOfProduct(producto2) * 10) / 10.0);
     }
 
     @org.junit.jupiter.api.Test
@@ -54,8 +58,8 @@ class PearRegisterTest {
         int units = register.getUnits(producto);
         assertEquals(2837, units);
 
-        register.addProduct(new Product("MakBukPro", 2020), new ArrayList<>());
-        int units2 = register.getUnits(new Product("MakBukPro", 2020));
+        register.addProduct(new Product("MakBukPro", 20243), new ArrayList<>());
+        int units2 = register.getUnits(new Product("MakBukPro", 20243));
         assertEquals(0, units2);
     }
 }

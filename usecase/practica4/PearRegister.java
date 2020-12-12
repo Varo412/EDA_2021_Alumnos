@@ -7,8 +7,6 @@ import material.maps.HashTableMapSC;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class PearRegister {
 
@@ -63,6 +61,12 @@ public class PearRegister {
         public void setScore(double score) {
             this.score = score;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            return this.id == ((PearStore) obj).getId();
+        }
+
     }
 
     public static class Product {
@@ -89,17 +93,23 @@ public class PearRegister {
         public void setYear(int year) {
             this.year = year;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            Product casted = ((Product) obj);
+            return this.name.equals(casted.getName()) && this.year == casted.getYear();
+        }
     }
 
 
-    HashTableMapLP<Product, ArrayList<PearStore>> register;
+    HashTableMapSC<Product, ArrayList<PearStore>> register;
 
     public void loadFile(String pathToFile) throws IOException {
         File file = new File(pathToFile);
         Scanner scan = new Scanner(file);
         int n = scan.nextInt();
 
-        this.register = new HashTableMapLP<>(n);
+        this.register = new HashTableMapSC<>(n);
 
         for (int i = 0; i < n; i++) {
             String name = scan.next();
@@ -128,25 +138,22 @@ public class PearRegister {
     }
 
     public void addSalesInPearStore(Product producto, PearStore store, int units, double score) {
-        register.get(producto).stream().filter(sto -> sto.equals(store)).findFirst().ifPresent(pearStore -> {
+        register.get(findProduct(producto)).stream().filter(sto -> sto.equals(store)).findFirst().ifPresent(pearStore -> {
             pearStore.setStock(units);
             pearStore.setScore(score);
         });
     }
 
     public double getScoreOfProduct(Product producto) {
-        return register.get(producto).stream().mapToDouble(PearStore::getScore).average().orElseThrow(() -> new RuntimeException("Product not found"));
+        return register.get(findProduct(producto)).stream().mapToDouble(PearStore::getScore).average().orElse(0);
     }
 
     public PearStore getGreatestSeller(Product producto) {
-        return register.get(producto).stream().max(Comparator.comparing(PearStore::getStock)).orElseThrow(() -> new RuntimeException("Product not found"));
+        return register.get(findProduct(producto)).stream().max(Comparator.comparing(PearStore::getStock)).orElse(null);
     }
 
     public int getUnits(Product producto) {
-        Product p = findProduct(producto);
-        ArrayList<PearStore> l = register.get(p);
-        List<Integer> l2 = register.get(p).stream().map(s -> s.getStock()).collect(Collectors.toList());
-        return register.get(p).stream().map(s -> s.getStock()).reduce(Integer::sum).orElse(0);
+        return register.get(findProduct(producto)).stream().map(s -> s.getStock()).reduce(Integer::sum).orElse(0);
     }
 
     public boolean productExists(Product product) {
@@ -154,7 +161,7 @@ public class PearRegister {
     }
 
     private Product findProduct(Product ref) {
-        return ((ArrayList<Product>) register.keys()).stream().filter(e -> (e.getName().equals(ref.getName()) && e.getYear() == ref.getYear())).findFirst().orElse(null);
+        return ((ArrayList<Product>) register.keys()).stream().filter(e -> e.equals(ref)).findFirst().orElse(null);
     }
 }
 
