@@ -1,12 +1,10 @@
 package usecase.practica4;
 
-import material.maps.HashTableMapDH;
-import material.maps.HashTableMapLP;
 import material.maps.HashTableMapSC;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 public class PearRegister {
 

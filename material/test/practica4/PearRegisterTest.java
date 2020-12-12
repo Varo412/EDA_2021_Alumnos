@@ -7,7 +7,6 @@ import usecase.practica4.PearRegister.Product;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
